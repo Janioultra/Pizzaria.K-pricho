@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Pedidos Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- *** NOVO: Biblioteca para gerar QR Code *** -->
+    <!-- Biblioteca para gerar QR Code (RESTAURADA) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,27 +65,22 @@
             }
         }
 
-        /* Estilos Carrossel Menu Principal */
+        /* Estilos Carrossel Menu Principal (Com scrollbar nativa) */
          .menu-category-container {
              display: flex;
              overflow-x: auto;
              scroll-snap-type: x mandatory;
              gap: 1rem;
-             padding: 0.5rem 1rem 1rem 1rem;
-             margin: 0 -1rem;
-             -ms-overflow-style: none;  /* Esconde scrollbar IE/Edge */
-             scrollbar-width: none; /* Esconde scrollbar Firefox */
-             cursor: grab; /* Indica que é arrastável */
-             scroll-behavior: smooth; /* Rolagem suave */
-             -webkit-overflow-scrolling: touch; /* Melhora scroll em iOS */
-             user-select: none;
-             -webkit-user-select: none;
-             -moz-user-select: none;
-             -ms-user-select: none;
+             padding: 0.5rem 1rem 1rem 1rem; 
+             margin: 0 -1rem; 
+             -ms-overflow-style: auto;  /* Mostra no IE/Edge */
+             scrollbar-width: thin; /* Mostra no Firefox */
+             scrollbar-color: #4a5568 #2d3748; /* Cor para Firefox */
+             scroll-behavior: smooth; 
+             -webkit-overflow-scrolling: touch; 
          }
-         /* Esconde scrollbar Chrome/Safari */
          .menu-category-container::-webkit-scrollbar {
-             display: none;
+             display: block; /* Garante que a scrollbar estilizada apareça */
          }
          .menu-item-card {
             flex: 0 0 80%; /* Tamanho mobile */
@@ -147,36 +142,214 @@
             font-weight: bold;
         }
 
-        /* *** NOVO: Estilos para o Gerador de QR Code *** */
-        #qrcode-output {
+        /* --- ESTILOS PARA O NOVO GERADOR DE QR CODE --- */
+        /* O conteúdo do modal */
+        #qr-generator-modal-content {
+            width: 100%;
+            max-width: 800px;
+            background-color: #dcf2e2; /* Fundo verde claro do gerador */
+            color: #333; /* Texto escuro do gerador */
+            border-radius: 8px;
+            padding: 24px;
+            max-height: 90vh; /* Altura máxima */
+            overflow-y: auto; /* Scroll se for muito alto */
+            position: relative; /* Para o botão de fechar */
+        }
+
+        #qr-generator-modal h1 {
+            text-align: center;
+            color: #111;
+            margin-bottom: 24px;
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: bold;
+        }
+
+        #qr-generator-modal h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            margin-top: 0;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: bold;
+            color: #111;
+        }
+
+        #qr-generator-modal .geradores {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            #qr-generator-modal .geradores {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        #qr-generator-modal .box {
+            background-color: rgba(255, 255, 255, 0.5); 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        #qr-generator-modal input[type="text"],
+        #qr-generator-modal input[type="password"],
+        #qr-generator-modal input[type="number"],
+        #qr-generator-modal textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            color: #333; /* Garante que o texto do input seja escuro */
+        }
+        
+        #qr-generator-modal input[type="text"]::placeholder,
+        #qr-generator-modal input[type="password"]::placeholder {
+             color: #6c757d; /* Cor do placeholder */
+        }
+
+
+        #qr-generator-modal button {
+            width: 100%;
+            padding: 12px;
+            background-color: #34c759; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        #qr-generator-modal button:hover {
+            background-color: #28a745; 
+        }
+
+        #qr-generator-modal .resultado {
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        #qr-generator-modal #qrcode {
+            width: 256px;
+            height: 256px;
+            margin: 16px auto;
+            border: 1px solid #ddd;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 280px; /* 256px + padding */
-            width: 100%;
-            background-color: #fff; /* Fundo branco para o QR code */
-            padding: 12px;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        /* Estilo para as abas (tabs) */
-        .qr-tab-btn.active {
-            border-bottom-color: #3B82F6; /* border-blue-500 */
-            color: #FFFFFF; /* text-white */
-        }
-        .qr-tab-btn {
-            border-bottom-color: transparent;
-            color: #9CA3AF; /* text-gray-400 */
+            padding: 10px;
+            background-color: #fafafa;
         }
 
+        #qr-generator-modal #qrcode img,
+        #qr-generator-modal #qrcode canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #qr-generator-modal .botoes-resultado {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            max-width: 278px;
+            margin: 0 auto;
+            margin-top: 16px;
+        }
+
+        #qr-generator-modal .botoes-resultado button {
+            width: auto;
+            flex-grow: 1; 
+        }
+
+        #qr-generator-modal #btn-download {
+            background-color: #28a745;
+        }
+        #qr-generator-modal #btn-download:hover {
+            background-color: #218838;
+        }
+        
+        #qr-generator-modal #btn-print {
+            background-color: #6c757d;
+        }
+        #qr-generator-modal #btn-print:hover {
+            background-color: #5a6268;
+        }
+
+        #qr-generator-modal #btn-limpar {
+            background-color: #dc3545;
+        }
+        #qr-generator-modal #btn-limpar:hover {
+            background-color: #c82333;
+        }
+
+        #qr-generator-modal .hidden {
+            display: none;
+        }
+        
+        #qr-generator-modal footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333; /* Cor escura para ler bem no fundo verde */
+        }
+
+        #qr-generator-modal footer p {
+            margin: 5px 0; /* Espaçamento entre as linhas */
+        }
+
+        /* Regras de impressão específicas para este modal */
+        @media print {
+            body.printing-qr-generator > *:not(#qr-generator-modal) {
+                display: none;
+            }
+            body.printing-qr-generator #qr-generator-modal {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-height: none;
+                background-color: #fff;
+                box-shadow: none;
+                border: none;
+            }
+             body.printing-qr-generator #qr-generator-modal-content {
+                background-color: #fff;
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                margin: 0;
+                transform: scale(1) !important;
+                max-height: none;
+                overflow: visible;
+             }
+            
+            body.printing-qr-generator #qr-generator-modal-content > *:not(.resultado) {
+                display: none;
+            }
+            body.printing-qr-generator #qr-generator-modal .resultado {
+                display: block;
+            }
+            body.printing-qr-generator #qr-generator-modal .resultado h2,
+            body.printing-qr-generator #qr-generator-modal .botoes-resultado,
+            body.printing-qr-generator #qr-generator-modal footer {
+                display: none;
+            }
+            body.printing-qr-generator #qr-generator-modal #qrcode {
+                border: none;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white antialiased relative">
-
-    <!-- Ecrã de Seleção de Tema (Removido, vai direto para a pizzaria) -->
-    <div id="theme-selection" class="hidden min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- ... (código inalterado) ... -->
-    </div>
 
     <!-- Aplicação Principal -->
     <div id="main-app" class="pb-24">
@@ -189,7 +362,7 @@
             </button>
            <!-- Botão de Admin (AGORA VEM DEPOIS) -->
             <button onclick="showAdminLoginModal()" title="Painel Admin" class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826 3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
         </div>
         <!-- Adicionado max-w-7xl para limitar largura em telas grandes -->
@@ -469,11 +642,11 @@
                  <button onclick="saveDeliverySettings()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500">Salvar Configurações de Entrega</button>
             </div>
 
-            <!-- *** NOVO: Botão Gerador de QR Code *** -->
+            <!-- Botão Gerador de QR Code (ADICIONADO) -->
             <div class="mb-6 bg-gray-900 p-6 rounded-lg">
                 <h3 class="text-xl font-bold mb-4">Ferramentas</h3>
-                <button onclick="openQrModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500">
-                    Gerar QR Code (Site, Wi-Fi, PIX)
+                <button onclick="openQrGeneratorModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500">
+                    Gerador QR Code (PIX, Wi-Fi)
                 </button>
             </div>
 
@@ -517,68 +690,57 @@
         </div>
     </div>
 
-    <!-- *** NOVO: Modal Gerador de QR Code *** -->
-    <div id="qr-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 invisible opacity-0 z-50">
-       <div class="modal-content bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-8 transform scale-95 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                 <h2 class="text-2xl font-bold">Gerador de QR Code</h2>
-                 <button onclick="hideQrModal()" class="text-gray-400 hover:text-white text-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full">×</button>
+    <!-- Modal Gerador de QR Code (ADICIONADO) -->
+    <div id="qr-generator-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 invisible opacity-0 z-50">
+       <!-- Conteúdo do modal adaptado de gerador.html -->
+       <div id="qr-generator-modal-content" class="modal-content transform scale-95">
+            <!-- Botão de fechar -->
+            <button onclick="hideQrGeneratorModal()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full bg-white/50 hover:bg-white/80 p-1" style="z-index: 10;">
+                &times;
+            </button>
+            
+            <h1>Gerador de QR Code</h1>
+
+            <div class="geradores">
+                <div class="box">
+                    <h2>Site / URL</h2>
+                    <input type="text" id="input-url" placeholder="https://seusite.com.br">
+                    <button id="btn-url">Gerar QR Code</button>
+                </div>
+                <div class="box">
+                    <h2>Conexão Wi-Fi</h2>
+                    <input type="text" id="input-wifi-ssid" placeholder="Nome da rede (SSID)">
+                    <input type="password" id="input-wifi-pass" placeholder="Senha da rede">
+                    <button id="btn-wifi">Gerar QR Code</button>
+                </div>
+                <div class="box">
+                    <h2>PIX (Gerador BR Code)</h2>
+                    <input type="text" id="input-pix-key" placeholder="Sua Chave PIX (CPF, e-mail, etc)">
+                    <input type="text" id="input-pix-name" placeholder="Seu Nome (até 25 chars)">
+                    <input type="text" id="input-pix-city" placeholder="Sua Cidade (até 15 chars)">
+                    <input type="text" id="input-pix-amount" placeholder="Valor (Ex: 10,50) (opcional)">
+                    <input type="text" id="input-pix-txid" placeholder="ID da Transação (opcional, ex: 'fatura123')">
+                    <button id="btn-pix">Gerar QR Code PIX</button>
+                </div>
+            </div>
+
+            <div class="resultado">
+                <h2>Seu QR Code:</h2>
+                <div id="qrcode">
+                    <p>O QR Code aparecerá aqui...</p>
+                </div>
+                
+                <div class="botoes-resultado">
+                    <button id="btn-download" class="hidden">Download (PNG)</button>
+                    <button id="btn-print" class="hidden">Imprimir</button>
+                    <button id="btn-limpar" class="hidden">Limpar</button>
+                </div>
             </div>
             
-            <!-- Abas (Tabs) -->
-            <div class="border-b border-gray-700 mb-4">
-                <nav class="flex space-x-4" aria-label="Tabs">
-                    <button id="tab-btn-site" onclick="changeQrTab('site')" class="qr-tab-btn active px-3 py-2 font-medium text-sm rounded-t-lg border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500">Site</button>
-                    <button id="tab-btn-wifi" onclick="changeQrTab('wifi')" class="qr-tab-btn px-3 py-2 font-medium text-sm rounded-t-lg border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500">Wi-Fi</button>
-                    <button id="tab-btn-pix" onclick="changeQrTab('pix')" class="qr-tab-btn px-3 py-2 font-medium text-sm rounded-t-lg border-b-2 focus:outline-none focus:ring-2 focus:ring-blue-500">PIX</button>
-                </nav>
-            </div>
-
-            <!-- Conteúdo das Abas -->
-            <div class="flex-grow">
-                <!-- Aba Site -->
-                <div id="qr-tab-site">
-                    <p class="text-gray-400 mb-4">Gera um QR code para o endereço atual deste site.</p>
-                    <button onclick="generateSiteQR()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Gerar QR do Site</button>
-                </div>
-                <!-- Aba Wi-Fi -->
-                <div id="qr-tab-wifi" class="hidden">
-                    <div class="mb-4">
-                        <label for="wifi-ssid" class="block text-gray-400 mb-2">Nome da Rede (SSID)</label>
-                        <input type="text" id="wifi-ssid" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="NomeExatoDaRede">
-                    </div>
-                    <div class="mb-4">
-                        <label for="wifi-pass" class="block text-gray-400 mb-2">Senha</label>
-                        <input type="text" id="wifi-pass" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="SenhaDaRede">
-                    </div>
-                    <div class="mb-4">
-                        <label for="wifi-security" class="block text-gray-400 mb-2">Tipo de Segurança</label>
-                        <select id="wifi-security" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="WPA">WPA/WPA2</option>
-                            <option value="WEP">WEP</option>
-                            <option value="nopass">Nenhuma (Rede Aberta)</option>
-                        </select>
-                    </div>
-                    <button onclick="generateWifiQR()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Gerar QR Wi-Fi</button>
-                </div>
-                <!-- Aba PIX -->
-                <div id="qr-tab-pix" class="hidden">
-                    <div class="mb-4">
-                        <label for="pix-key" class="block text-gray-400 mb-2">Chave PIX (Telefone, E-mail, CPF, etc.)</label>
-                        <input type="text" id="pix-key" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="7599804-3792">
-                    </div>
-                     <p class="text-xs text-gray-400 mb-4">Nota: Isto gera um QR code simples com a sua chave. O cliente precisará digitar o valor manualmente. Para um QR "Copia e Cola" completo, é necessário um sistema externo.</p>
-                    <button onclick="generatePixQR()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">Gerar QR da Chave PIX</button>
-                </div>
-            </div>
-
-            <!-- Área de Resultado do QR Code -->
-            <div id="qrcode-wrapper" class="mt-6 hidden">
-                <div id="qrcode-output">
-                    <!-- O QR Code será gerado aqui -->
-                </div>
-                <button onclick="downloadQR()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500">Download QR Code</button>
-            </div>
+            <footer>
+                <p>Todos os direitos reservados &copy; 2025 Jânio Carlos P</p>
+                <p>WhatsApp: 55 75 99831-2170</p>
+            </footer>
        </div>
     </div>
 
@@ -630,9 +792,9 @@
         ],
         sucos: [
             // *** MODIFICADO: Itens agrupados por sabor com múltiplos preços ***
-            { id: 33, name: 'Suco de Laranja', description: 'Suco natural feito na hora.', prices: { '300ml': 4.00, '500ml': 6.00 }, image: 'https://placehold.co/600x400/F6AD55/000000?text=Suco' },
-            { id: 35, name: 'Suco de Limão', description: 'Suco natural feito na hora.', prices: { '300ml': 4.00, '500ml': 6.00 }, image: 'https://placehold.co/600x400/9AE6B4/000000?text=Suco' },
-            { id: 37, name: 'Suco de Maracujá', description: 'Suco natural feito na hora.', prices: { '300ml': 4.00, '500ml': 6.00 }, image: 'https://placehold.co/600x400/F6E05E/000000?text=Suco' },
+            { id: 33, name: 'Sucos Naturais', description: 'Laranja, Limão, Maracujá.', prices: { '300ml': 4.00, '500ml': 6.00 }, image: 'https://placehold.co/600x400/F6AD55/000000?text=Suco' },
+            // { id: 35, ... } // Removido
+            // { id: 37, ... } // Removido
             { 
                 id: 39, 
                 name: 'Suco de Polpa', 
@@ -671,13 +833,12 @@
         size: null,
         flavor: null,
         price: 0,
-        isNatural: false 
+        isNatural: false // Flag para diferenciar suco natural de polpa
     };
     // *** REMOVIDO: Estado 'currentJuice' não é mais necessário ***
     let lastOrderMessage = '';
     let lastWhatsappUrl = '';
-    // *** NOVO: Instância do QR Code ***
-    let qrCodeInstance = null;
+    // let qrCodeInstance = null; // REMOVIDO
 
 
     // --- SELETORES DE DOM ---
@@ -730,10 +891,9 @@
     const polpaFlavorOptions = document.getElementById('polpa-flavor-options');
     const polpaTotalPrice = document.getElementById('polpa-total-price');
     const addPolpaToCartBtn = document.getElementById('add-polpa-to-cart-btn');
-    // *** NOVO: Seletores para o modal de QR Code ***
-    const qrModal = document.getElementById('qr-modal');
-    const qrCodeOutput = document.getElementById('qrcode-output');
-    const qrCodeWrapper = document.getElementById('qrcode-wrapper');
+    
+    // ADICIONADO: Seletor para o novo modal de QR Code
+    const qrGeneratorModal = document.getElementById('qr-generator-modal');
 
 
     // --- FUNÇÕES DE DADOS (LocalStorage) ---
@@ -787,10 +947,9 @@
         mainAppDiv.classList.remove('hidden');
         restaurantNameH1.textContent = "🍕 Pizzaria e Calzoneria K'pricho";
         renderMenu(); // Chama renderMenu que agora renderiza o HTML
-        // A função addDragScrollListeners será chamada em window.onload
     }
 
-    // Lógica de botões atualizada
+    // *** MODIFICADO: Lógica de botões para sucos ***
     function createProductCard(item, type) { 
         let priceDisplay = '';
         let actionButton = '';
@@ -805,7 +964,10 @@
         
         } else if (type === 'sucos' && item.prices) { // Outros Sucos (Laranja, Limão, etc.)
              priceDisplay = `<span class="text-lg font-bold text-green-400">A partir de R$ ${item.prices['300ml'].toFixed(2).replace('.', ',')}</span>`;
-             actionButton = `<button onclick="openPolpaModal(${item.id}, true)" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500">Escolher Tamanho</button>`;
+             // *** MODIFICADO: Chama openPolpaModal, mas com flag 'isNatural' ***
+             // IDs 33 (Laranja), 35 (Limão), 37 (Maracujá), 41 (Morango)
+             const isNatural = item.id === 33 || item.id === 35 || item.id === 37 || item.id === 41;
+             actionButton = `<button onclick="openPolpaModal(${item.id}, ${isNatural})" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500">Escolher</button>`;
 
         } else if (type === 'bebidas' && item.id === 30) { // Refrigerante (ID 30)
             priceDisplay = `<span class="text-2xl font-bold text-green-400">R$ ${item.price.toFixed(2).replace('.', ',')}</span>`;
@@ -1444,8 +1606,6 @@
         hidePolpaModal();
     }
     // *** FIM DAS FUNÇÕES DO MODAL DE POLPA ***
-
-    // *** REMOVIDO: Funções do 'juice-size-modal' agora são parte do 'polpa-modal' ***
     
 
 
@@ -1456,7 +1616,6 @@
             toggleCartPanel(); 
         }
 
-        // *** NOVO: Lógica para mostrar/esconder campos de endereço ***
         const orderType = document.querySelector('input[name="order-type"]:checked').value;
         if (orderType === 'pickup') {
             addressFieldWrapper.classList.add('hidden');
@@ -1467,7 +1626,6 @@
             locationFieldWrapper.classList.remove('hidden');
             addressInput.required = true; // É obrigatório
         }
-        // *** FIM DA LÓGICA ***
 
         checkoutModal.classList.remove('invisible', 'opacity-0');
         checkoutModal.querySelector('.modal-content').classList.remove('scale-95');
@@ -1980,202 +2138,30 @@
     });
 
 
-    // --- *** NOVO: Funções do Gerador de QR Code *** ---
-
-    function openQrModal() {
+    // --- FUNÇÕES DO NOVO GERADOR DE QR CODE (ADICIONADO) ---
+    function openQrGeneratorModal() {
         hideAdminPanel(); // Esconde o painel de admin
-        qrModal.classList.remove('invisible', 'opacity-0');
-        qrModal.querySelector('.modal-content').classList.remove('scale-95');
-        changeQrTab('site'); // Abre na primeira aba
-        clearQrOutput(); // Limpa qualquer QR code anterior
-    }
-
-    function hideQrModal() {
-        qrModal.classList.add('invisible', 'opacity-0');
-        qrModal.querySelector('.modal-content').classList.add('scale-95');
-        clearQrOutput();
-        // Opcional: Reabrir painel admin se desejar
-        // showAdminPanel(); 
-    }
-
-    function changeQrTab(tabName) {
-        // Esconde todos os conteúdos
-        document.getElementById('qr-tab-site').classList.add('hidden');
-        document.getElementById('qr-tab-wifi').classList.add('hidden');
-        document.getElementById('qr-tab-pix').classList.add('hidden');
-        // Desativa todas as abas
-        document.getElementById('tab-btn-site').classList.remove('active');
-        document.getElementById('tab-btn-wifi').classList.remove('active');
-        document.getElementById('tab-btn-pix').classList.remove('active');
-        
-        // Mostra o conteúdo e ativa a aba correta
-        document.getElementById(`qr-tab-${tabName}`).classList.remove('hidden');
-        document.getElementById(`tab-btn-${tabName}`).classList.add('active');
-        
-        clearQrOutput(); // Limpa o QR code ao trocar de aba
-    }
-
-    function clearQrOutput() {
-        if (qrCodeInstance) {
-            qrCodeInstance.clear(); // Limpa o canvas
-            qrCodeInstance = null;
+        if (qrGeneratorModal) {
+            qrGeneratorModal.classList.remove('invisible', 'opacity-0');
+            qrGeneratorModal.querySelector('.modal-content').classList.remove('scale-95');
         }
-        qrCodeOutput.innerHTML = '<span class="text-gray-500">A pré-visualização do QR Code aparecerá aqui.</span>';
-        qrCodeWrapper.classList.add('hidden'); // Esconde a área de output
     }
 
-    // *** CORRIGIDO: Esta função agora limpa o placeholder corretamente ***
-    function generateQRCode(text) {
-        try {
-            // 1. Limpa o placeholder ou QR antigo
-            if (qrCodeInstance) {
-                qrCodeInstance.clear();
-                qrCodeInstance = null;
+    function hideQrGeneratorModal() {
+        if (qrGeneratorModal) {
+            qrGeneratorModal.classList.add('invisible', 'opacity-0');
+            qrGeneratorModal.querySelector('.modal-content').classList.add('scale-95');
+            // Limpa o QR code ao fechar
+            if (window.limparQRCode) {
+                window.limparQRCode();
             }
-            qrCodeOutput.innerHTML = ''; 
-
-            // 2. Create o novo QR code
-            qrCodeInstance = new QRCode(qrCodeOutput, {
-                text: text,
-                width: 256,
-                height: 256,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            
-            // 3. Mostra o wrapper
-            qrCodeWrapper.classList.remove('hidden'); 
-        } catch (e) {
-            console.error("Erro ao gerar QR Code:", e);
-            alert("Ocorreu um erro ao gerar o QR Code.");
-            clearQrOutput(); // Reset on error
         }
     }
-
-    function generateSiteQR() {
-        generateQRCode(window.location.href);
-    }
-
-    function generateWifiQR() {
-        const ssid = document.getElementById('wifi-ssid').value;
-        const pass = document.getElementById('wifi-pass').value;
-        const security = document.getElementById('wifi-security').value;
-        
-        if (!ssid) {
-            alert("Por favor, insira o Nome da Rede (SSID).");
-            return;
-        }
-        
-        const wifiString = `WIFI:T:${security};S:${ssid};P:${pass};;`;
-        generateQRCode(wifiString);
-    }
-
-    // *** CORRIGIDO: Usa o placeholder se o campo estiver vazio ***
-    function generatePixQR() {
-        const keyInput = document.getElementById('pix-key');
-        let keyValue = keyInput.value;
-        
-        if (!keyValue) {
-            keyValue = keyInput.placeholder; // Usa o valor do placeholder
-        }
-
-        if (!keyValue) {
-            alert("Por favor, insira uma Chave PIX.");
-            return;
-        }
-        generateQRCode(keyValue);
-    }
-
-    function downloadQR() {
-        if (!qrCodeInstance) {
-            alert("Nenhum QR Code foi gerado para baixar.");
-            return;
-        }
-        
-        // Encontra o canvas ou a imagem gerada
-        const canvas = qrCodeOutput.querySelector('canvas');
-        const img = qrCodeOutput.querySelector('img');
-        
-        let dataUrl;
-
-        if (canvas) {
-            dataUrl = canvas.toDataURL('image/png');
-        } else if (img) {
-            dataUrl = img.src;
-        } else {
-            alert("Não foi possível encontrar a imagem do QR code para baixar.");
-            return;
-        }
-
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = 'qrcode.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-    // --- FIM DAS FUNÇÕES DO QR Code ---
 
 
     // --- INICIALIZAÇÃO ---
 
-    // Função para adicionar listeners de arraste
-    function addDragScrollListeners() {
-        const sliders = document.querySelectorAll('.menu-category-container');
-        sliders.forEach(slider => {
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            // Eventos do Mouse
-            slider.addEventListener('mousedown', (e) => {
-                isDown = true;
-                slider.style.cursor = 'grabbing';
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
-            });
-            slider.addEventListener('mouseleave', () => {
-                if (!isDown) return; 
-                isDown = false;
-                slider.style.cursor = 'grab';
-            });
-            slider.addEventListener('mouseup', () => {
-                 if (!isDown) return; 
-                isDown = false;
-                slider.style.cursor = 'grab';
-            });
-            slider.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault(); 
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2; 
-                slider.scrollLeft = scrollLeft - walk;
-            });
-
-            // Eventos de Toque 
-            slider.addEventListener('touchstart', (e) => {
-                isDown = true;
-                startX = e.touches[0].pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
-            }, { passive: true }); 
-
-            slider.addEventListener('touchend', () => {
-                isDown = false;
-            }, { passive: true });
-
-            slider.addEventListener('touchcancel', () => {
-                isDown = false; 
-            }, { passive: true });
-
-            slider.addEventListener('touchmove', (e) => {
-                if (!isDown) return;
-                const x = e.touches[0].pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2;
-                slider.scrollLeft = scrollLeft - walk;
-            }, { passive: true }); 
-        });
-    }
+    // *** REMOVIDA: Função addDragScrollListeners() ***
 
      window.onload = () => {
         loadMenuData();
@@ -2196,14 +2182,212 @@
         if (cartPanel) cartPanel.classList.remove('open');
         if (cartOverlay) cartOverlay.classList.remove('open');
         
-        // Adiciona listeners de arraste após tudo carregar
-        addDragScrollListeners();
+        // *** REMOVIDA: Chamada para addDragScrollListeners() ***
 
         // Adiciona listeners para salvar info do checkout
         if (nameInput) nameInput.addEventListener('input', saveCheckoutInfo);
         if (phoneInput) phoneInput.addEventListener('input', saveCheckoutInfo);
         if (addressInput) addressInput.addEventListener('input', saveCheckoutInfo);
     };
+
+    // --- SCRIPT DO GERADOR DE QR CODE (ADICIONADO) ---
+    (function() {
+        // Seletores DOM específicos do modal
+        const qrContainer = document.getElementById('qrcode');
+        if (!qrContainer) {
+            // Se o modal não está no DOM, não faz nada
+            return;
+        }
+        
+        let qrcodeInstance = null; // Renomeado de 'qrcode' para 'qrcodeInstance' para evitar conflito global
+
+        const btnUrl = document.getElementById('btn-url');
+        const inputUrl = document.getElementById('input-url');
+        const btnWifi = document.getElementById('btn-wifi');
+        const inputWifiSsid = document.getElementById('input-wifi-ssid');
+        const inputWifiPass = document.getElementById('input-wifi-pass');
+        const btnPix = document.getElementById('btn-pix');
+        const inputPixKey = document.getElementById('input-pix-key');
+        const inputPixName = document.getElementById('input-pix-name');
+        const inputPixCity = document.getElementById('input-pix-city');
+        const inputPixAmount = document.getElementById('input-pix-amount');
+        const inputPixTxid = document.getElementById('input-pix-txid');
+
+        const btnLimpar = document.getElementById('btn-limpar');
+        const btnDownload = document.getElementById('btn-download');
+        const btnPrint = document.getElementById('btn-print');
+
+
+        function gerarQRCode(texto) {
+            limparQRCode(); // Chama a função interna
+            try {
+                qrcodeInstance = new QRCode(qrContainer, {
+                    text: texto,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                btnLimpar.classList.remove('hidden');
+                btnDownload.classList.remove('hidden');
+                btnPrint.classList.remove('hidden');
+            } catch (e) {
+                console.error("Erro ao gerar QR Code:", e);
+                alert("Erro ao gerar QR Code. Verifique se a biblioteca está carregada.");
+            }
+        }
+
+        function limparQRCode() {
+            if (qrcodeInstance) {
+                qrcodeInstance.clear();
+                qrcodeInstance = null; // Limpa a instância
+            }
+            qrContainer.innerHTML = '<p>O QR Code aparecerá aqui...</p>';
+            btnLimpar.classList.add('hidden');
+            btnDownload.classList.add('hidden');
+            btnPrint.classList.add('hidden');
+        }
+        
+        // Anexa ao window para ser chamada externamente (ex: hideQrGeneratorModal)
+        window.limparQRCode = limparQRCode;
+
+        if(btnLimpar) btnLimpar.addEventListener('click', limparQRCode);
+
+        if(btnPrint) btnPrint.addEventListener('click', () => {
+            // Foca no modal para impressão
+            document.body.classList.add('printing-qr-generator');
+            window.print();
+            document.body.classList.remove('printing-qr-generator');
+        });
+
+        if(btnDownload) btnDownload.addEventListener('click', () => {
+            const canvas = document.querySelector('#qr-generator-modal #qrcode canvas');
+            const img = document.querySelector('#qr-generator-modal #qrcode img'); // Fallback
+
+            let dataUrl;
+            
+            if (canvas) {
+                dataUrl = canvas.toDataURL('image/png');
+            } else if (img) {
+                // Se for imagem, precisa de um canvas temporário
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+                const ctx = tempCanvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                dataUrl = tempCanvas.toDataURL('image/png');
+            } else {
+                 alert('Erro: Não foi possível encontrar a imagem do QR Code para baixar.');
+                 return;
+            }
+
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'qrcode.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        if(btnUrl) btnUrl.addEventListener('click', () => {
+            const url = inputUrl.value;
+            if (url) { gerarQRCode(url); } else { alert("Por favor, digite uma URL."); }
+        });
+
+        if(btnWifi) btnWifi.addEventListener('click', () => {
+            const ssid = inputWifiSsid.value;
+            const pass = inputWifiPass.value;
+            if (ssid) {
+                const wifiString = `WIFI:T:WPA;S:${ssid};P:${pass};;`;
+                gerarQRCode(wifiString);
+            } else { alert("Por favor, digite pelo menos o nome da rede (SSID)."); }
+        });
+        
+        function formatarEMV(id, value) {
+            const length = ('00' + value.length).slice(-2);
+            return `${id}${length}${value}`;
+        }
+
+        function simplificarTexto(text) {
+            if (!text) return '';
+            return text
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^\w\s]/g, ''); // Remove caracteres não-alfanuméricos, exceto espaço
+        }
+
+        function crc16(data) {
+            let crc = 0xFFFF;
+            for (let i = 0; i < data.length; i++) {
+                crc ^= data.charCodeAt(i) << 8;
+                for (let j = 0; j < 8; j++) {
+                    crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+                }
+            }
+            return ('0000' + (crc & 0xFFFF).toString(16).toUpperCase()).slice(-4);
+        }
+
+        if(btnPix) btnPix.addEventListener('click', () => {
+            const key = inputPixKey.value;
+            let name = inputPixName.value;
+            let city = inputPixCity.value;
+            let amount = inputPixAmount.value;
+            let txid = inputPixTxid.value;
+
+            if (!key || !name || !city) {
+                alert("Chave PIX, Nome e Cidade são obrigatórios!");
+                return;
+            }
+
+            const merchantAccountInfo = [
+                formatarEMV('00', 'br.gov.bcb.pix'),
+                formatarEMV('01', key)
+            ].join('');
+
+            let brCode = [
+                formatarEMV('00', '01'),
+                formatarEMV('26', merchantAccountInfo),
+                formatarEMV('52', '0000'), // Merchant Category Code (MCC) - 0000 ou XXXX
+                formatarEMV('53', '986') // Transaction Currency (BRL - 986)
+            ];
+
+            if (amount) {
+                const amountComPonto = amount.replace(",", "."); 
+                if (isNaN(parseFloat(amountComPonto))) {
+                     alert("Valor inválido. Use o formato 10,50 ou 10.50");
+                     return;
+                }
+                const valorFormatado = parseFloat(amountComPonto).toFixed(2);
+                brCode.push(formatarEMV('54', valorFormatado));
+            }
+
+            brCode.push(formatarEMV('58', 'BR')); // Country Code
+            name = simplificarTexto(name).substring(0, 25);
+            brCode.push(formatarEMV('59', name)); // Merchant Name
+            city = simplificarTexto(city).substring(0, 15);
+            brCode.push(formatarEMV('60', city)); // Merchant City
+
+            // TXID
+            txid = txid ? txid.replace(/\s/g, '') : '***';
+            if (txid.length > 25) {
+                 txid = txid.substring(0, 25);
+            }
+            
+            const additionalData = formatarEMV('05', txid);
+            brCode.push(formatarEMV('62', additionalData));
+            
+            brCode.push('6304'); // CRC16 ID
+            
+            let stringPIX = brCode.join('');
+            const checksum = crc16(stringPIX);
+            const brCodeCompleto = stringPIX + checksum;
+
+            console.log("BR Code Gerado:", brCodeCompleto);
+            gerarQRCode(brCodeCompleto);
+        });
+
+    })(); // Fim da IIFE
 
 </script>
 
